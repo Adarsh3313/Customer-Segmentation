@@ -2,16 +2,23 @@ import streamlit as st
 import pandas as pd
 import pickle
 
+# Load the trained clustering model (PCA + KMeans pipeline)
 with open("clustering_model.pkl", "rb") as f:
     model = pickle.load(f)
 
+# Columns used during training (full list)
 feature_columns = [
     'Income',
     'MntWines',
     'MntMeatProducts',
     'MntGoldProds',
+    'MntFruits',
+    'MntFishProducts',
+    'MntSweetProducts',
     'NumWebPurchases',
     'NumStorePurchases',
+    'NumCatalogPurchases',
+    'NumWebVisitsMonth',
     'Recency',
     'Total_Spent'
 ]
@@ -30,17 +37,21 @@ if uploaded_file is not None:
     st.subheader("Uploaded Data")
     st.dataframe(data.head())
 
+    # Recreate Total_Spent (same as in your notebook)
     spend_columns = [
         'MntWines',
         'MntMeatProducts',
         'MntGoldProds',
-        'MntFishProducts',
         'MntFruits',
+        'MntFishProducts',
         'MntSweetProducts'
     ]
     data['Total_Spent'] = data[spend_columns].sum(axis=1)
 
+    # Select the same features used during training
     X = data[feature_columns]
+
+    # Predict
     clusters = model.predict(X)
     data['Cluster'] = clusters
 
