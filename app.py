@@ -6,6 +6,18 @@ import pickle
 with open("clustering_model.pkl", "rb") as f:
     model = pickle.load(f)
 
+# Columns used for training
+feature_columns = [
+    'Income',
+    'MntWines',
+    'MntMeatProducts',
+    'MntGoldP',
+    'NumWebPurchases',
+    'NumStorePurchases',
+    'Recency',
+    'Total_Spent'
+]
+
 st.set_page_config(page_title="Customer Segmentation App", layout="wide")
 st.title("📊 Customer Segmentation with PCA & Clustering")
 st.write(
@@ -15,7 +27,6 @@ st.write(
 # File uploader
 uploaded_file = st.file_uploader("Upload CSV or Excel file", type=["csv", "xlsx"])
 
-# If a file is uploaded
 if uploaded_file is not None:
     # Read file
     if uploaded_file.name.endswith(".csv"):
@@ -26,8 +37,11 @@ if uploaded_file is not None:
     st.subheader("Uploaded Data")
     st.dataframe(data.head())
 
+    # Select features used during training
+    X = data[feature_columns]
+
     # Predict clusters
-    clusters = model.predict(data)
+    clusters = model.predict(X)
     data["Cluster"] = clusters
 
     st.subheader("Clustered Data")
