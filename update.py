@@ -2,26 +2,9 @@ import streamlit as st
 import pandas as pd
 import pickle
 
-# Load the trained clustering model (PCA + KMeans pipeline)
+# Load trained clustering model (PCA + KMeans pipeline with preprocessing)
 with open("clustering_model.pkl", "rb") as f:
     model = pickle.load(f)
-
-# Columns used during training (full list)
-feature_columns = [
-    'Income',
-    'MntWines',
-    'MntMeatProducts',
-    'MntGoldProds',
-    'MntFruits',
-    'MntFishProducts',
-    'MntSweetProducts',
-    'NumWebPurchases',
-    'NumStorePurchases',
-    'NumCatalogPurchases',
-    'NumWebVisitsMonth',
-    'Recency',
-    'Total_Spent'
-]
 
 st.set_page_config(page_title="Customer Segmentation App", layout="wide")
 st.title("📊 Customer Segmentation with PCA & Clustering")
@@ -29,6 +12,7 @@ st.title("📊 Customer Segmentation with PCA & Clustering")
 uploaded_file = st.file_uploader("Upload CSV or Excel file", type=["csv", "xlsx"])
 
 if uploaded_file is not None:
+    # Read file
     if uploaded_file.name.endswith(".csv"):
         data = pd.read_csv(uploaded_file)
     else:
@@ -37,7 +21,7 @@ if uploaded_file is not None:
     st.subheader("Uploaded Data")
     st.dataframe(data.head())
 
-    # Recreate Total_Spent (same as in your notebook)
+    # Recreate Total_Spent (as you did in the notebook)
     spend_columns = [
         'MntWines',
         'MntMeatProducts',
@@ -48,11 +32,9 @@ if uploaded_file is not None:
     ]
     data['Total_Spent'] = data[spend_columns].sum(axis=1)
 
-    # Select the same features used during training
-    X = data[feature_columns]
+    # ⚠️ Important: pass the full raw dataframe to the pipeline
+    clusters = model.predict(data)
 
-    # Predict
-    clusters = model.predict(X)
     data['Cluster'] = clusters
 
     st.subheader("Clustered Data")
